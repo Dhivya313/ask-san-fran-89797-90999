@@ -4,9 +4,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Sparkles, ChevronUp, ChevronDown, Home } from "lucide-react";
+import { Loader2, Sparkles, ChevronUp, ChevronDown, Home, Moon, Sun } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import { useTheme } from "next-themes";
 
 interface RAGResponse {
   answer: string;
@@ -19,6 +20,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<RAGResponse | null>(null);
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
 
   const handleGenerate = async () => {
     if (!question.trim()) {
@@ -69,22 +71,36 @@ const Index = () => {
     <div className="min-h-screen bg-background p-6 flex items-center justify-center">
       <div className="w-full max-w-3xl space-y-6 animate-fade-in">
         {/* Header */}
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center gap-2 mb-2">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between mb-2">
             <Link to="/">
               <Button variant="ghost" size="icon" className="rounded-xl">
                 <Home className="h-5 w-5" />
               </Button>
             </Link>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="rounded-xl"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            >
+              {theme === "dark" ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+            </Button>
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.1]">
-            <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-              RAG Testing
-            </span>
-          </h1>
-          <p className="text-muted-foreground text-xl md:text-2xl max-w-2xl mx-auto leading-relaxed">
-            Ask questions and retrieve contextual answers
-          </p>
+          <div className="text-center">
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.1]">
+              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                RAG Testing
+              </span>
+            </h1>
+            <p className="text-muted-foreground text-xl md:text-2xl max-w-2xl mx-auto leading-relaxed mt-4">
+              Ask questions and retrieve contextual answers
+            </p>
+          </div>
         </div>
 
         {/* Input Card */}
