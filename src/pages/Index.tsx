@@ -6,13 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Sparkles, ChevronUp, ChevronDown, Home, Moon, Sun } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom"; // This component requires a Router context which is missing.
 import { useTheme } from "next-themes";
 
 interface RAGResponse {
   answer: string;
   contexts: string[];
 }
+
+// Define the API endpoint
+const API_URL = "http://127.0.0.1:8000/query";
 
 const Index = () => {
   const [question, setQuestion] = useState("");
@@ -33,30 +36,41 @@ const Index = () => {
     }
 
     setIsLoading(true);
-    
-    // Simulate API call with mock data
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
+    setResponse(null); // Clear previous response
+
     try {
-      // Mock response - replace with actual API call
-      const mockResponse: RAGResponse = {
-        answer: "Based on the retrieved context, the answer to your question is: This is a comprehensive response that demonstrates the RAG (Retrieval-Augmented Generation) system's ability to combine retrieved information with generated content to provide accurate and contextual answers.",
-        contexts: [
-          "Context 1: This is the first relevant piece of information retrieved from the knowledge base that helps answer the question.",
-          "Context 2: Additional supporting information that provides more depth and context to the query.",
-          "Context 3: Final piece of contextual data that completes the comprehensive answer.",
-        ].slice(0, topK)
-      };
-      
-      setResponse(mockResponse);
+      // This is the actual API call
+      const apiResponse = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({
+          query: question,
+          top_k: topK,
+        }),
+      });
+
+      if (!apiResponse.ok) {
+        // Handle HTTP errors (e.g., 500, 503)
+        const errorData = await apiResponse.json();
+        throw new Error(errorData.detail || `HTTP error! status: ${apiResponse.status}`);
+      }
+
+      const data: RAGResponse = await apiResponse.json();
+
+      setResponse(data);
       toast({
         title: "Answer generated",
         description: "Successfully retrieved contexts and generated answer.",
       });
+
     } catch (error) {
+      console.error("Failed to generate answer:", error);
       toast({
         title: "Error",
-        description: "Failed to generate answer. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to generate answer. Check console or API logs.",
         variant: "destructive",
       });
     } finally {
@@ -73,14 +87,18 @@ const Index = () => {
         {/* Header */}
         <div className="space-y-4">
           <div className="flex items-center justify-between mb-2">
-            <Link to="/">
+            {/* FIX: Replaced react-router-dom's <Link> with a standard <a> tag.
+              The <Link> component was causing a crash because it was not 
+              wrapped in a <BrowserRouter> context.
+            */}
+            <a href="/">
               <Button variant="ghost" size="icon" className="rounded-xl">
                 <Home className="h-5 w-5" />
               </Button>
-            </Link>
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            </a>
+            <Button
+              variant="ghost"
+              size="icon"
               className="rounded-xl"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             >
@@ -179,6 +197,7 @@ const Index = () => {
         </Card>
 
         {/* Results */}
+        {/* This section will now be populated by the API response */}
         {response && (
           <div className="space-y-6 animate-slide-up">
             {/* Generated Answer */}
