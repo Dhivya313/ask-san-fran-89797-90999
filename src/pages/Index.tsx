@@ -15,7 +15,7 @@ interface RAGResponse {
 }
 
 // Define the API endpoint
-const API_URL = "https://8ac922a08523.ngrok-free.app/query";
+const API_URL = "https://77af061a085d.ngrok-free.app/query";
 
 const Index = () => {
   const [question, setQuestion] = useState("");
